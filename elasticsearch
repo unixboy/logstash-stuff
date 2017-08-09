@@ -1,0 +1,26 @@
+input {
+  file {
+    path => "/var/log/apache/access.log"
+    type => "apache-access"
+  }
+}
+ 
+filter {
+  if [type] == "apache-access" {
+    grok { 
+      type => "apache-access"
+      pattern => "%{COMBINEDAPACHELOG}" 
+    }
+  }
+}
+ 
+output {
+  if [type] == "apache-access" {
+    if "_grokparsefailure" in [tags] {
+      null {}
+    }
+        elasticsearch { 
+    }
+  }
+}
+ 
