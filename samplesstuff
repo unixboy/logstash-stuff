@@ -1,0 +1,454 @@
+ 
+num 1501193955 + 5616 = $num
+
+
+    } \w \[(.*?)]
+
+
+.*\[(.*?)\]\ \(.*?JConsumer\[(.*?)\]
+.*\ -\ \[(.*?)\]
+
+.*\ -\ JmsConsumer\[(.*?)\]
+
+.*\[(.*?)\]\ \(.*?JmsConsumer\[(.*?)\]\ \(.*?JMSDestination\[(.*?)\]
+
+((?:\w|(?:%(?=\w|\d){2,}))(?:\w|\-|\.|(?:%(?=\w|\d){2,}))*=(?:\w|\-|\.|(?:%(?=\w|\d){2,}))*)
+
+
+((?:\w|(?:%(?=\w|\d){2,}))(?:\w|\-|\.|(?:%(?=\w|\d){2,}))*=(?:\w|\-|\.|(?:%(?=\w|\d){2,}))*)
+
+
+GUID 
+[\da-zA-Z]{8}-([\da-zA-Z]{4}-){3}[\da-zA-Z]{12}
+
+
+remove between []
+
+\[(.*?)\]
+
+
+ <hdr:MsgCorrelationID>3PA_1501193955_5968</hdr:MsgCorrelationID>JmsConsumer
+
+
+filter {
+  grok {
+    patterns_dir => ["./patterns"]
+    match => { "message" => "%{SYSLOGBASE} %{POSTFIX_QUEUEID:queue_id}: %{GREEDYDATA:syslog_message}" }
+  }
+}
+
+
+input {
+   file {
+    path => "/temp/server.log"
+#    start_position => beginning
+   }
+}
+
+output {
+    stdout {
+        codec => rubydebug
+    }
+    file {
+        codec => "plain"
+        path => "/tmp/logs-%{+YYYY-MM-dd}.log"
+    }
+}
+
+~
+
+
+
+
+
+
+
+
+
+file {
+path => [ "/var/log/*.log", "/var/log/syslog" ]
+type => "syslog"
+}
+}
+
+filter {
+if [type] == "syslog" {
+grok {
+match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:[%{POSINT:syslog_pid}])?: %{GREEDYDATA:syslog_message}" }
+add_field => [ "received_at", "%{@timestamp}" ]
+add_field => [ "received_from", "%{host}" ]
+}
+syslog_pri { }
+date {
+match => [ "syslog_timestamp", "MMM d HH:mm:ss", "MMM dd HH:mm:ss" ]
+}
+}
+}
+
+output {
+    stdout {
+        codec => rubydebug
+    }
+    file {
+        codec => "plain"
+        path => "/tmp/logs-%{+YYYY-MM-dd}.log"
+    }
+}
+
+
+ bin/logstash -f ./joels.conf --config.test_and_exit
+bin/logstash -f soi.test --config.reload.automatic
+
+
+{
+          "path" => "/temp/server.log",
+    "@timestamp" => 2017-08-02T00:10:04.401Z,
+      "@version" => "1",
+          "host" => "elasticsearch",
+       "message" => "\tat org.apache.camel.processor.Pipeline.process(Pipeline.java:118) [camel-core-2.13.2.jar:2.13.2]",
+          "type" => "syslog",
+          "tags" => [
+        [0] "_grokparsefailure"
+    ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+                "path" => "/temp/server.log",
+          "@timestamp" => 2017-08-01T23:35:11.486Z,
+    "syslog_timestamp" => "Jul 31 11:41:53",
+            "@version" => "1",
+                "host" => "elasticsearch",
+ }
+
+
+msgCorrelationID=SB_1501193955_7139,
+
+
+
+
+
+
+
+
+#####
+
+## "queue" : "joelqout",
+JMS_NAME  (.*?)
+#JMSCONSUMER  .*\ -\ JmsConsumer\[(%{JMS_NAME})\]
+JMSCONSUMER  .*\ -\ JmsConsumer\[(%{JMS_NAME:router})\]
+
+## "route" : " ConnectionHandler",
+JMS_ROUTE (.*?)
+JMSROUTE \[(%{JMS_ROUTE:jmsRoute})]
+#JMSROUTE  .*\[(%{JMS_ROUTE:jmsRoute})\]
+
+
+
+## "msgCorrelationID" : " 1501193955_5616",
+
+
+MESS (?:SB_[0-9]*_[0-9]*)
+MESSAGECOL \msgCorrelationID=(%{MESS:jmsxDeliveryCount})
+#MESSAGECOL \msgCorrelationID=(?:SB_[0-9]*_[0-9]*)
+
+
+
+#MESSAGECOL .*\ (<hdr:MsgCorrelationID>)(%{MESS})
+#*.?(msgCorrelationID=[SB_0-9]{10,100})
+
+## "jmsxDeliveryCount" :  4 }
+JSCOM (.*)
+JMS_COM \[(%{JSCOM:jmsCom})\]
+
+JMS_COUNT JMSCONSUMER(%{JMSROUTE})
+
+#Q_ROUTE (.*?)
+#JMS_CON \[(%{TEST:test})]
+
+#JMS_b (.*?)
+#JMSROUTEB  .*\[(%{JMS_ROUTE:jsrt}x)\]
+
+
+JMSX_COUNT (.*?)
+JMSX \JMSXDeliveryCount(%{JMSXDeliveryCount:jmsxDeliveryCount})
+
+##jmsxDeliveryCount
+JMSX_COUNT (.*?)
+JMSX .*\[(%{JMSXDeliveryCount:jmsxDeliveryCount})\]
+
+~
+\JMSXDeliveryCount(.[0-9])
+
+
+
+
+
+
+      grok {
+       match => { "message" => "%{JMSCONSUMER}" }
+      }
+
+
+
+JMS_NAME  (.*?)
+JMS  .*\ -\ JmsConsumer\[(%{JMS_NAME:jmsConsumer})\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####
+## "queue" : "",
+JMS_NAME  (.*?)
+JMSCONSUMER  .*\ -\ JmsConsumer\[(%{JMS_NAME:JmsConsumer})\]
+
+## "route" : "c ",
+JMS_ROUTE (.*?)
+JMSROUTE \[(%{JMS_ROUTE:jmsRoute})]
+
+## "msgCorrelationID" : "S 16",
+MESS (?:SB_[0-9]*_[0-9]*)
+MESSAGECOL \msgCorrelationID=(%{MESS:MsgCorrelationID})
+
+##jmsxDeliveryCount
+JMSX_COUNT [0-9]
+JMSXCONECTOR (.*\ JMSXDeliveryCount=(%{JMSX_COUNT:jmsxDeliveryCount}))
+
+
+
+
+
+
+
+
+
+filter {
+      grok {
+        match => { "message" => "(?m)%{TIMESTAMP_GMT:ts}" }
+      }
+      grok {
+       match => { "message" => "%{JMSROUTE}" }
+      }
+      grok {
+       match => { "message" => "%{JMSCONSUMER}" }
+      }
+
+      grok {
+      match => { "message" => "%{MESSAGECOL}" }
+     }
+      grok {
+      match => { "message" => "%{JMSXCONECTOR}" }
+
+     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+input {
+file {
+
+path => "logs.log"
+start_position => "beginning"
+}
+
+}
+filter {
+
+grok {
+
+match => [ "message", "(?<timestamp>%{YEAR:year}-%{MONTHNUM:month}-%{MONTHDAY:day}T%{HOUR:hour}:%{MINUTE:minute}:%{SECOND:second}%{ISO8601_TIMEZONE:timezone}) %{LOGLEVEL:log_level} %{NUMBER:line:int}" ]
+}
+date{
+match => ["timestamp" , "yyyy-MM-dd'T'HH:mm:ss.SSSZ"]
+}
+ruby {
+code=> " hr=event['hour'].to_i ;
+min = event['minute'].to_i ;
+sec = event['second'].to_i;
+hr_to_sec = hr * 60 * 60;
+min_to_sec = min * 60;
+event['time']= hr_to_sec + min_to_sec + sec ;
+event['message']= var2;
+event['difference'] = event['time'].to_i - var1;
+event.cancel if var1 ==0 ;
+var1=event['time'].to_i ;
+var2 =event['log_level'];
+event.cancel if event['difference'] <= 20 
+"
+}
+mutate {
+
+remove_field => ['year']
+remove_field => ['month']
+remove_field => ['day']
+remove_field => ['hour']
+remove_field => ['minute']
+remove_field => ['second']
+}
+
+}
+
+output 
+{
+stdout {
+codec => rubydebug{}
+}
+
+elasticsearch
+{
+codec => rubydebug{}
+cluster =>"elastic"
+action => "index"
+host => "localhost"
+index => "example"
+}
+}
+
+
+
+
+
+filter {
+if [type] == "Error_file" {
+    csv {
+            columns => ["timestamp", "message"]
+    }
+    date {
+            match => ["timestamp", "[M/dd/yy HH:mm:ss:SSS]"]
+            add_field => { "Date" => "%{+M/dd/yy}" }
+            add_field => { "Time" => "%{+HH:mm:ss:SSS}" }
+    }
+}
+}
+
+
+mutate {
+    add_field => { "newtimestamp" => "%{logtimestamp}" }
+    remove_field => ["logtimestamp"]
+}
+date {
+    match => [ "newtimestamp" , "ISO8601" , "yyyy-MM-dd HH:mm:ss.SSS" ]
+    target => "@timestamp"  <-- the timestamp which you wanted to apply on
+    locale => "en"
+    timezone => "UTC"
+}
+
+date {
+            locale => "en"
+            match => ["logTimestamp", "YYYY-MM-dd;HH:mm:ss.SSS", "ISO8601"]
+            timezone => "Europe/Vienna"
+            target => "@timestamp"
+            add_field => { "debug" => "timestampMatched"}
+        }
+
+
+
+
+      match => {
+            "message" => [ "(?<timestamp>(\d){4}-(\d){2}-(\d){2} (\d){2}:(\d){2}:(\d){2}.(\d){3}) %{SYSLOG5424SD} ERROR u%{BASE16FLOAT}.%{JAVACLASS} - TransId:2b948ed5-12c0-4ae0-9b99-f1ee01191001 - TransactionId ::\"2b948ed5-12c0-4ae0-9b99-f1ee01191001\"- Actual Time taken to process \:\: %{NUMBER:responseTime:int}" ]
+            } 
+
+  }
+
+date {
+        match => [ "timestamp:date" , "yyyy-MM-dd HH:mm:ss.SSS Z"  ]
+        timezone => "UTC"
+        target => "@timestamp"
+
+
+
+
+ 
+
+# Take only type- events (type-componentA, type-componentB, etc)
+filter {
+    # You cannot write an "if" outside of the filter!
+    if "type-" in [type] {
+        grok {
+            # Parse timestamp data. We need the "(?m)" so that grok (Oniguruma internally) correctly parses multi-line events
+            patterns_dir => "./patterns"
+            match => [ "message", "(?m)%{TIMESTAMP_ISO8601:logTimestampString}[ ;]\[%{DATA:logThreadId}\][ ;]%{LOGLEVEL:logLevel}[ ;]*%{GREEDYDATA:logMessage}" ]
+        }
+
+        # The timestamp may have commas instead of dots. Convert so as to store everything in the same way
+        mutate {
+            gsub => [
+                # replace all commas with dots
+                "logTimestampString", ",", "."
+                ]
+        }
+
+        mutate {
+            gsub => [
+                # make the logTimestamp sortable. With a space, it is not! This does not work that well, in the end
+                # but somehow apparently makes things easier for the date filter
+                "logTimestampString", " ", ";"
+                ]
+        }
+
+        date {
+            locale => "en"
+            match => ["logTimestampString", "YYYY-MM-dd;HH:mm:ss.SSS"]
+            timezone => "Europe/Vienna"
+            target => "logTimestamp"
+        }
+    }
+}
+
+filter {
+    if "type-" in [type] {
+        # Remove already-parsed data
+        mutate {
+            remove_field => [ "message" ]
+        }
+    }
+}
+
